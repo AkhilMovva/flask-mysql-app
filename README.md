@@ -1,6 +1,10 @@
 # flask-mysql-app
 
 ## Update the db.yaml respectively 
+mysql_host: 'localhost'
+mysql_user: 'root'
+mysql_password: '<password>'
+mysql_db: 'flaskapp'
 
 ## Useful Commands
 ```
