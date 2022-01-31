@@ -1,6 +1,6 @@
 # flask-mysql-app
 
-## Update the db.ymal respectively
+## Update the db.yaml respectively 
 
 ## Useful Commands
 ```
