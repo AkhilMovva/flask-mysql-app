@@ -13,4 +13,7 @@ sudo apt-get install libmysqlclient-dev -y
 pip3 install flask-mysqldb
 
 sudo mysql -u root -p
+mysql> create database flaskapp;
+mysql> use flaskapp;
+mysql> create table users(name varchar(20), email varchar(40));
 ```
