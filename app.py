@@ -6,7 +6,7 @@ app =Flask(__name__)
 
 #Configure db
 
-db = yaml.load(open('db.yaml'))
+db = yaml.safe_load(open('db.yaml'))
 
 app.config['MYSQL_HOST'] = db['mysql_host']
 app.config['MYSQL_USER'] = db['mysql_user']
