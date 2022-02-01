@@ -25,8 +25,8 @@ def index():
 		cur.execute("INSERT INTO users(name, email) VALUES(%s, %s)", (name, email))
 		mysql.connection.commit()
 		cur.close()	
-		return 'success'
-		#return redirect('/users')
+		#return 'success'
+		return redirect('/users')
 	return render_template('index.html')
 	
 @app.route('/users')
