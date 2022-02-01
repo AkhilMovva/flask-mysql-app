@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+ 
+    triggers {
+        pollSCM '* * * * *'
+    }
+
+    stages {
+        stage('checkout') {
+           steps {
+             
+            git credentialsId: 'Github', url: 'https://github.com/AkhilMovva/flask-mysql-app'
+             
+            }
+        }
+        
+        stage('Clean docker containers'){
+            steps{
+                script{
+                
+                    def doc_containers = sh(returnStdout: true, script: 'docker container ps -aq').replaceAll("\n", " ") 
+                    if (doc_containers) {
+                        sh "docker stop ${doc_containers}"
+                        sh "docker rm ${doc_containers}"
+                    }
+                    
+                }
+            }
+        }
+        
+        stage('Docker Build and Tag') {
+            steps {
+              
+                sh 'docker build -t flask-image:latest .' 
+                sh 'docker tag flask-image akhilmovva/flask-image:latest'
+                //sh 'docker tag flask-image akhilmovva/flask-image:$BUILD_NUMBER'
+               
+                }
+        }
+     
+        // stage('Publish image to Docker Hub') {
+          
+        //     steps {
+        //         withDockerRegistry([ credentialsId: "dockerHub", url: "" ]) {
+        //         sh  'docker push akhilmovva/flask-image:latest'
+        //         //  sh  'docker push flask-image/flask-image:$BUILD_NUMBER' 
+        //         }
+                  
+        //     }
+        // }
+        
+     
+        stage('Run Docker container on Jenkins Agent') {
+             
+            steps {
+                sh "docker run -d -p 5000:5000 --name flask-app akhilmovva/flask-image"
+            }
+        }
+        
+        // stage('Run Docker container on remote hosts') {
+             
+        //     steps {
+        //         sh "docker -H ssh://ubuntu@172.31.28.25 run -d -p 5000:5000 akhilmovva/flask-image"
+ 
+        //     }
+        // }
+    }
+ }

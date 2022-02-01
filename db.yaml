@@ -1,4 +1,4 @@
-mysql_host: '54.89.14.80'
+mysql_host: '184.72.192.13'
 mysql_user: 'akhil'
 mysql_password: 'Avengers@123'
 mysql_db: 'flaskapp'
