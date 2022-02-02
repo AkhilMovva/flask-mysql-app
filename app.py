@@ -17,6 +17,8 @@ mysql = MySQL(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+	ip_address = request.remote_addr
+    # return "Requester IP: " + ip_address
 	if request.method == 'POST':
 		userDetails = request.form
 		name = userDetails['name']
@@ -27,7 +29,7 @@ def index():
 		cur.close()	
 		#return 'success'
 		return redirect('/users')
-	return render_template('index.html')
+	return render_template('index.html', ipDetails=ip_address)
 	
 @app.route('/users')
 def users():
