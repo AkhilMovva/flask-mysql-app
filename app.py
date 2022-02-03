@@ -5,7 +5,6 @@ import yaml
 app =Flask(__name__)
 
 #Configure db
-
 db = yaml.safe_load(open('db.yaml'))
 
 app.config['MYSQL_HOST'] = db['mysql_host']
@@ -19,6 +18,7 @@ mysql = MySQL(app)
 def index():
 	ip_address = request.remote_addr
     # return "Requester IP: " + ip_address
+
 	if request.method == 'POST':
 		userDetails = request.form
 		name = userDetails['name']
@@ -38,7 +38,7 @@ def users():
 	if resultValue > 0:
 		userDetails = cur.fetchall()
 		return render_template('users.html', userDetails=userDetails)
-	
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

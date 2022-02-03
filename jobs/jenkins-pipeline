@@ -38,7 +38,7 @@ pipeline {
         stage('Docker Build and Tag') {
             steps {
               
-                sh 'docker build -t flask-image:${tag} .' 
+                sh 'docker build -t akhilmovva/flask-image:latest -t akhilmovva/flask-image:${tag} .' 
                 // sh 'docker tag flask-image akhilmovva/flask-image:${tag}'
                 //sh 'docker tag flask-image akhilmovva/flask-image:$BUILD_NUMBER'
                
@@ -57,17 +57,17 @@ pipeline {
         // }
         
      
-        stage('Run Docker container on Jenkins Agent') {
+        // stage('Run Docker container on Jenkins Agent') {
              
-            steps {
-                sh "docker run -d -p 5000:5000 --name flask-app flask-image:${tag}"
-            }
-        }
+        //     steps {
+        //         sh "docker run -d -p 5000:5000 --name flask-app flask-image:${tag}"
+        //     }
+        // }
         
         // stage('Run Docker container on remote hosts') {
              
         //     steps {
-        //         sh "docker -H ssh://ubuntu@3.90.1.83 run -d -p 5000:5000 --restart unless-stopped akhilmovva/flask-image"
+        //         sh "ssh ubuntu@18.204.221.45 docker  run -d -p 5000:5000 --restart unless-stopped akhilmovva/flask-image:0.3"
  
         //     }
         // }
