@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request, redirect
 from flask_mysqldb import MySQL
 import yaml
+import os
 
 app =Flask(__name__)
 
 #Configure db
 db = yaml.safe_load(open('db.yaml'))
-
-app.config['MYSQL_HOST'] = db['mysql_host']
+flask_env = os.environ.get('ENV')
+mysql_host = os.environ['MYSQL_HOST']
+app.config['MYSQL_HOST'] = mysql_host
 app.config['MYSQL_USER'] = db['mysql_user']
 app.config['MYSQL_PASSWORD'] = db['mysql_password']
 app.config['MYSQL_DB'] = db['mysql_db']
@@ -29,7 +31,7 @@ def index():
 		cur.close()	
 		#return 'success'
 		return redirect('/users')
-	return render_template('index.html', ipDetails=ip_address)
+	return render_template('index.html', ipDetails=ip_address, flaskEnv = flask_env, mysqlHost=mysql_host)
 	
 @app.route('/users')
 def users():
