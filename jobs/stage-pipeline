@@ -1,0 +1,94 @@
+pipeline {
+    agent any
+    
+    environment {
+        // tag ="latest"
+        tag = sh(returnStdout: true, script: "git rev-parse --short=10 HEAD").trim()
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+    }
+
+    stages {
+        stage('checkout') {
+           steps {
+             
+                git branch: 'stage', url: 'https://github.com/AkhilMovva/flask-mysql-app'
+             
+            } 
+            
+        }
+        stage('overide'){
+            environment {
+                tag=sh(returnStdout: true, script: "git rev-parse --short=10 HEAD").trim()
+                }
+            steps {
+                
+                sh "echo ${tag}"
+            }
+        }
+        
+        stage('Clean docker containers'){
+            steps{
+                script{
+                
+                    def doc_containers = sh(returnStdout: true, script: 'docker container ps -aq').replaceAll("\n", " ") 
+                    if (doc_containers) {
+                        sh "docker stop ${doc_containers}"
+                        sh "docker rm ${doc_containers}"
+                        sh "docker image prune"
+                    }
+                    
+                }
+            }
+        }
+        
+        stage('Docker Build and Tag') {
+            steps {
+              
+                sh 'docker build -t akhilmovva/flask-image:${tag} .' 
+                // sh 'docker tag flask-image akhilmovva/flask-image:${tag}'
+                //sh 'docker tag flask-image akhilmovva/flask-image:$BUILD_NUMBER'
+               
+                }
+        }
+        
+        stage('Publish image to Docker Hub') {
+          
+            steps {
+                // withDockerRegistry([ credentialsId: "dockerHub", url: "" ]) {
+                // sh  'docker push akhilmovva/flask-image:${tag}'
+                // //  sh  'docker push flask-image/flask-image:$BUILD_NUMBER' 
+                // }
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                sh 'docker push akhilmovva/flask-image:${tag}'
+            }
+        }
+        
+        
+        // stage('Run Docker container on remote hosts') {
+             
+        //     steps {
+                
+        //         sh "ssh ubuntu@3.87.76.74 docker  run -d -p 5000:5000 --restart unless-stopped akhilmovva/flask-image:${tag}"
+ 
+        //     }
+        // }
+        stage('Run Docker container on remote hosts') {
+            steps{
+                withCredentials([sshUserPrivateKey(credentialsId: 'ssh_stage_ubuntu', keyFileVariable: 'KEY_FILE', usernameVariable: 'ubuntu')]) {
+                    
+                    sh '''
+                    pwd
+                    cat ${KEY_FILE} > ssh_key.key
+                    eval $(ssh-agent -s)
+                    chmod 600 ssh_key.key
+                    ssh-add ssh_key.key
+                    cd ~/.ssh
+                    echo "ssh-rsa ... (the string from the server's id_rsa.pub)" >> authorized_keys
+                    ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -i  ssh_key.key ubuntu@54.145.253.10 docker run akhilmovva/flask-image
+                    
+                    '''
+                }
+            }
+        }
+    }
+ }
