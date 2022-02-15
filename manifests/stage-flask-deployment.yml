@@ -39,4 +39,4 @@ spec:
     - name: http
       port: 80 # Service Port
       targetPort: 5000 # Container Port
-      nodePort: 31213 # NodePort
+      nodePort: 31214 # NodePort
