@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-deployment-stage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-app-stage
+  template: 
+    metadata:
+      name: flask-pod-stage
+      labels: 
+        app: flask-app-stage        
+    spec:
+      containers:
+        - name: flask-app-container-stage
+          image: akhilmovva/flask-image:stage
+          env: 
+            - name: ENV
+              value: "stage"
+            - name: MYSQL_HOST
+              value: "mysql-service"
+          ports:
+          - containerPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-nodeport-service-stage
+  labels: 
+    app: flask-app-stage
+spec:
+  type: NodePort #LoadBalancer  
+  selector:
+    app: flask-app-stage
+  ports: 
+    - name: http
+      port: 80 # Service Port
+      targetPort: 5000 # Container Port
+      nodePort: 31213 # NodePort
