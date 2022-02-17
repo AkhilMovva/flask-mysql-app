@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+    
+    environment {
+        tag = "prod"
+        // tag = sh(returnStdout: true, script: "git rev-parse --short=10 HEAD").trim()
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+        env = "prod"
+    }
+
+    stages {
+        stage('checkout') {
+           steps {
+             
+                git branch: 'prod', url: 'https://github.com/AkhilMovva/flask-mysql-app'
+             
+            } 
+            
+        }
+
+        stage('Docker Build and Tag') {
+            steps {
+              
+                sh 'docker build -t akhilmovva/flask-image:${tag} .' 
+                // sh 'docker tag flask-image akhilmovva/flask-image:${tag}'
+                //sh 'docker tag flask-image akhilmovva/flask-image:$BUILD_NUMBER'
+               
+                }
+        }
+        
+        stage('Publish image to Docker Hub') {
+          
+            steps {
+                // withDockerRegistry([ credentialsId: "dockerHub", url: "" ]) {
+                // sh  'docker push akhilmovva/flask-image:${tag}'
+                // //  sh  'docker push flask-image/flask-image:$BUILD_NUMBER' 
+                // }
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                sh 'docker push akhilmovva/flask-image:${tag}'
+            }
+        }
+        
+        stage ('K8S cleanup') {
+            steps{
+                withAWS(credentials: 'aws_cred', region: 'us-east-1') {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh '''
+                    cd manifests
+                    kubectl delete -f ${env}-flask-deployment.yml
+                    docker rmi akhilmovva/flask-image:${tag}
+                    '''
+                    }
+                }
+            }
+        }
+
+        stage ('K8S Deploy') {
+            steps{
+                withAWS(credentials: 'aws_cred', region: 'us-east-1') {
+                    sh '''
+                    cd manifests
+                    kubectl apply -f ${env}-flask-deployment.yml
+                    '''
+                }
+            }
+        }
+    } 
+    
+ }
