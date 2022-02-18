@@ -8,7 +8,7 @@ app =Flask(__name__)
 db_str = yaml.safe_load(open('db.yaml'))
 
 #mysql://username:password@server/db
-SQLALCHEMY_DATABASE_URI = 'mysql://akhil:Avengers123@3.82.143.221:3306/flaskapp'
+SQLALCHEMY_DATABASE_URI = 'mysql://akhil:password@x.x.x.x:3306/flaskapp'
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
